@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Task Manager with Pomodoro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Task Section */
+        .task-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-task-form {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-add {
+            width: 100%;
+        }
+
+        /* Task List */
+        .task-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            background: white;
+            border: 2px solid #f1f3f4;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item.completed {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .task-title.completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .task-datetime {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .task-priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .priority-high {
+            background: #ffe6e6;
+            color: #dc3545;
+        }
+
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-primary {
+            background: #007bff;
+        }
+
+        /* Pomodoro Timer Section */
+        .pomodoro-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: fit-content;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timer-mode {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+        }
+
+        .mode-work {
+            background: #ffe6e6;
+            color: #dc3545;
+        }
+
+        .mode-break {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        .btn-timer {
+            padding: 15px 25px;
+            font-size: 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-ring {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+        }
+
+        .progress-ring__circle {
+            stroke: #e9ecef;
+            stroke-width: 8;
+            fill: transparent;
+            r: 90;
+            cx: 100;
+            cy: 100;
+        }
+
+        .progress-ring__progress {
+            stroke: #667eea;
+            stroke-width: 8;
+            stroke-linecap: round;
+            fill: transparent;
+            r: 90;
+            cx: 100;
+            cy: 100;
+            transform: rotate(-90deg);
+            transform-origin: 100px 100px;
+            transition: stroke-dashoffset 0.5s;
+        }
+
+        /* Tree Growth Animation Styles */
+        #treeGroup g {
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #treeGroup line {
+            transition: all 0.3s ease-in-out;
+        }
+
+        #treeGroup circle {
+            transition: all 0.3s ease-in-out;
+        }
+
+        #treeGroup rect {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Fruit pulsing animation */
+        #treeFruits circle {
+            animation: fruitPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes fruitPulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: brightness(1.2);
+            }
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-item {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Scrollbar */
+        .task-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .task-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .task-list::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        /* Celebration Animation */
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .celebration-content {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: celebrationPop 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .celebration-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            animation: bounce 1s infinite;
+        }
+
+        .celebration-message {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .celebration-close {
+            background: white;
+            color: #ff6b6b;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .celebration-close:hover {
+            transform: scale(1.05);
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FFD700;
+            animation: confettiFall 3s linear infinite;
+        }
+
+        .confetti:nth-child(2) { left: 10%; animation-delay: 0.2s; background: #FF69B4; }
+        .confetti:nth-child(3) { left: 20%; animation-delay: 0.4s; background: #00BFFF; }
+        .confetti:nth-child(4) { left: 30%; animation-delay: 0.6s; background: #32CD32; }
+        .confetti:nth-child(5) { left: 40%; animation-delay: 0.8s; background: #FF4500; }
+        .confetti:nth-child(6) { left: 50%; animation-delay: 1.0s; background: #9370DB; }
+        .confetti:nth-child(7) { left: 60%; animation-delay: 1.2s; background: #FFB6C1; }
+        .confetti:nth-child(8) { left: 70%; animation-delay: 1.4s; background: #40E0D0; }
+        .confetti:nth-child(9) { left: 80%; animation-delay: 1.6s; background: #ADFF2F; }
+        .confetti:nth-child(10) { left: 90%; animation-delay: 1.8s; background: #FF1493; }
+
+        /* Balloons */
+        .balloon {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: balloonFloat 4s ease-in-out infinite;
+        }
+
+        .balloon-1 {
+            background: #FF69B4;
+            top: 20%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .balloon-2 {
+            background: #00BFFF;
+            top: 15%;
+            right: 5%;
+            animation-delay: 0.5s;
+        }
+
+        .balloon-3 {
+            background: #32CD32;
+            top: 25%;
+            left: 15%;
+            animation-delay: 1s;
+        }
+
+        /* Celebration Animations */
+        @keyframes celebrationPop {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes balloonFloat {
+            0%, 100% {
+                transform: translateY(0px) rotate(-2deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(2deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Pomodoro Celebration Styles */
+        .pomodoro-celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: gradientShift 3s ease-in-out infinite, fadeIn 0.5s ease-in;
+        }
+
+        .pomodoro-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 60px 40px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            animation: pomodoroZoom 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .pomodoro-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #667eea, #f093fb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        .pomodoro-message {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .tomato-animation {
+            font-size: 4rem;
+            margin: 20px 0;
+            animation: tomatoBounce 1s ease-in-out infinite;
+        }
+
+        .achievement-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .stat-bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            animation: statFloat 2s ease-in-out infinite;
+        }
+
+        .stat-bubble:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-bubble:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .pomodoro-close {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .pomodoro-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Sparkles Animation */
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #FFD700;
+            border-radius: 50%;
+            animation: sparkleFloat 3s linear infinite;
+        }
+
+        .sparkle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 20%; right: 15%; animation-delay: 0.5s; background: #FF69B4; }
+        .sparkle:nth-child(3) { top: 60%; left: 5%; animation-delay: 1s; background: #00BFFF; }
+        .sparkle:nth-child(4) { top: 70%; right: 10%; animation-delay: 1.5s; background: #32CD32; }
+        .sparkle:nth-child(5) { bottom: 20%; left: 20%; animation-delay: 2s; background: #FF6347; }
+        .sparkle:nth-child(6) { bottom: 10%; right: 25%; animation-delay: 2.5s; background: #9370DB; }
+
+        /* Pomodoro Animations */
+        @keyframes pomodoroZoom {
+            0% {
+                transform: scale(0.3) rotate(-10deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes tomatoBounce {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        @keyframes statFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes sparkleFloat {
+            0% {
+                transform: translateY(0px) scale(0);
+                opacity: 0;
+            }
+            25% {
+                transform: translateY(-20px) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-40px) scale(1.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-60px) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-tasks"></i> Simple Task Manager</h1>
+            <p>Stay productive with tasks and Pomodoro timer</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Task Management Section -->
+            <div class="task-section">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i>
+                    Your Tasks
+                </h2>
+
+                <!-- Add Task Form -->
+                <div class="add-task-form">
+                    <div class="form-group">
+                        <input type="text" id="taskTitle" placeholder="What do you need to do?" maxlength="100">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <select id="taskPriority">
+                                <option value="low">Low Priority</option>
+                                <option value="medium" selected>Medium Priority</option>
+                                <option value="high">High Priority</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="date" id="taskDate" title="Select date">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="time" id="taskTime" title="Select time">
+                        </div>
+                        <div class="form-group">
+                            <select id="taskAmPm">
+                                <option value="AM">AM</option>
+                                <option value="PM" selected>PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-add" onclick="addTask()">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+
+                <!-- Task List -->
+                <div class="task-list" id="taskList">
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No tasks yet</h3>
+                        <p>Add your first task above to get started!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pomodoro Timer Section -->
+            <div class="pomodoro-section">
+                <h2 class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Pomodoro Timer
+                </h2>
+
+                <div class="timer-mode" id="timerMode">
+                    <span class="mode-work">Focus Time</span>
+                </div>
+
+                <div class="tree-status" id="treeStatus" style="font-size: 0.9rem; color: #666; margin-bottom: 15px; min-height: 20px;">
+                    🌱 Ready to plant your focus seed
+                </div>
+
+                <svg class="progress-ring">
+                    <circle class="progress-ring__circle" />
+                    <circle class="progress-ring__progress" id="progressCircle" />
+                    <!-- Growing Tree - From Seed to Full Tree (Larger Scale) -->
+                    <g id="treeGroup" opacity="0.8">
+                        <!-- Seed (starting point - at bottom of circle) -->
+                        <circle id="seed" cx="100" cy="180" r="3" fill="#8B4513" opacity="1"/>
+                        
+                        <!-- Sprout (tiny green shoot) -->
+                        <g id="sprout" opacity="0">
+                            <line x1="100" y1="180" x2="100" y2="170" stroke="#228B22" stroke-width="3"/>
+                            <circle cx="96" cy="168" r="2.5" fill="#90EE90"/>
+                            <circle cx="104" cy="168" r="2.5" fill="#90EE90"/>
+                        </g>
+                        
+                        <!-- Young plant (small stem with leaves) -->
+                        <g id="youngPlant" opacity="0">
+                            <line x1="100" y1="180" x2="100" y2="155" stroke="#228B22" stroke-width="4"/>
+                            <ellipse cx="90" cy="165" rx="6" ry="3" fill="#32CD32"/>
+                            <ellipse cx="110" cy="160" rx="6" ry="3" fill="#32CD32"/>
+                            <ellipse cx="100" cy="155" rx="4" ry="2" fill="#90EE90"/>
+                        </g>
+                        
+                        <!-- Small tree (trunk with small crown) -->
+                        <g id="smallTree" opacity="0">
+                            <rect x="95" y="165" width="10" height="15" fill="#8B4513" rx="2"/>
+                            <circle cx="100" cy="150" r="18" fill="#228B22" opacity="0.7"/>
+                            <circle cx="100" cy="145" r="14" fill="#32CD32" opacity="0.8"/>
+                        </g>
+                        
+                        <!-- Medium tree (thicker trunk, larger crown) -->
+                        <g id="mediumTree" opacity="0">
+                            <rect x="92" y="160" width="16" height="20" fill="#8B4513" rx="3"/>
+                            <circle cx="100" cy="140" r="25" fill="#228B22" opacity="0.6"/>
+                            <circle cx="100" cy="135" r="20" fill="#32CD32" opacity="0.8"/>
+                            <circle cx="85" cy="145" r="12" fill="#228B22" opacity="0.5"/>
+                            <circle cx="115" cy="145" r="12" fill="#228B22" opacity="0.5"/>
+                            <circle cx="90" cy="130" r="8" fill="#32CD32" opacity="0.6"/>
+                            <circle cx="110" cy="130" r="8" fill="#32CD32" opacity="0.6"/>
+                        </g>
+                        
+                        <!-- Mature tree (full trunk, large crown with branches) -->
+                        <g id="matureTree" opacity="0">
+                            <!-- Main trunk -->
+                            <rect x="88" y="155" width="24" height="25" fill="#8B4513" rx="4"/>
+                            <!-- Root base -->
+                            <ellipse cx="100" cy="180" rx="15" ry="3" fill="#654321" opacity="0.3"/>
+                            
+                            <!-- Branch structure -->
+                            <line x1="100" y1="165" x2="75" y2="140" stroke="#8B4513" stroke-width="6"/>
+                            <line x1="100" y1="160" x2="125" y2="135" stroke="#8B4513" stroke-width="6"/>
+                            <line x1="100" y1="155" x2="70" y2="125" stroke="#8B4513" stroke-width="4"/>
+                            <line x1="100" y1="155" x2="130" y2="125" stroke="#8B4513" stroke-width="4"/>
+                            <line x1="100" y1="150" x2="85" y2="115" stroke="#8B4513" stroke-width="3"/>
+                            <line x1="100" y1="150" x2="115" y2="115" stroke="#8B4513" stroke-width="3"/>
+                            
+                            <!-- Large crown layers -->
+                            <circle cx="100" cy="125" r="35" fill="#228B22" opacity="0.4"/>
+                            <circle cx="100" cy="120" r="30" fill="#32CD32" opacity="0.6"/>
+                            <circle cx="100" cy="115" r="25" fill="#90EE90" opacity="0.8"/>
+                            <circle cx="100" cy="110" r="20" fill="#ADFF2F" opacity="0.9"/>
+                            
+                            <!-- Side foliage -->
+                            <circle cx="75" cy="140" r="18" fill="#228B22" opacity="0.5"/>
+                            <circle cx="125" cy="140" r="18" fill="#228B22" opacity="0.5"/>
+                            <circle cx="80" cy="125" r="15" fill="#32CD32" opacity="0.6"/>
+                            <circle cx="120" cy="125" r="15" fill="#32CD32" opacity="0.6"/>
+                            <circle cx="70" cy="120" r="12" fill="#90EE90" opacity="0.7"/>
+                            <circle cx="130" cy="120" r="12" fill="#90EE90" opacity="0.7"/>
+                        </g>
+                        
+                        <!-- Fruits/Flowers (final reward stage) -->
+                        <g id="treeFruits" opacity="0">
+                            <!-- Apples distributed throughout the crown -->
+                            <circle cx="85" cy="125" r="4" fill="#FF6347"/>
+                            <circle cx="115" cy="120" r="4" fill="#FF6347"/>
+                            <circle cx="100" cy="135" r="4" fill="#FF6347"/>
+                            <circle cx="90" cy="110" r="4" fill="#FF6347"/>
+                            <circle cx="110" cy="130" r="4" fill="#FF6347"/>
+                            <circle cx="75" cy="130" r="4" fill="#FF6347"/>
+                            <circle cx="125" cy="125" r="4" fill="#FF6347"/>
+                            <circle cx="95" cy="118" r="4" fill="#FF6347"/>
+                            
+                            <!-- Flowers -->
+                            <g transform="translate(78,115)">
+                                <circle r="3" fill="#FFB6C1"/>
+                                <circle cx="1.5" cy="1.5" r="1.5" fill="#FFF"/>
+                            </g>
+                            <g transform="translate(122,118)">
+                                <circle r="3" fill="#FFB6C1"/>
+                                <circle cx="1.5" cy="1.5" r="1.5" fill="#FFF"/>
+                            </g>
+                            <g transform="translate(105,112)">
+                                <circle r="3" fill="#FFB6C1"/>
+                                <circle cx="1.5" cy="1.5" r="1.5" fill="#FFF"/>
+                            </g>
+                            <g transform="translate(88,128)">
+                                <circle r="3" fill="#FFB6C1"/>
+                                <circle cx="1.5" cy="1.5" r="1.5" fill="#FFF"/>
+                            </g>
+                            <g transform="translate(112,135)">
+                                <circle r="3" fill="#FFB6C1"/>
+                                <circle cx="1.5" cy="1.5" r="1.5" fill="#FFF"/>
+                            </g>
+                        </g>
+                    </g>
+                </svg>
+
+                <div class="timer-display" id="timerDisplay">25:00</div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-timer" onclick="startTimer()" id="startBtn">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                    <button class="btn btn-timer" onclick="pauseTimer()" id="pauseBtn" style="display: none;">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button class="btn btn-timer" onclick="resetTimer()">
+                        <i class="fas fa-refresh"></i> Reset
+                    </button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="completedTasks">0</div>
+                        <div class="stat-label">Tasks Done</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pomodoroSessions">0</div>
+                        <div class="stat-label">Pomodoros</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Task Management
+        let tasks = [];
+        let nextId = 1;
+
+        // Pomodoro Timer
+        let timerInterval;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let isRunning = false;
+        let isWorkTime = true;
+        let pomodoroCount = 0;
+
+        // Audio for notifications
+        function playNotificationSound(type = 'work') {
+            console.log('Playing sound:', type); // Debug log
+            
+            try {
+                if (type === 'work') {
+                    // Pleasant completion sound for work sessions
+                    playBeep(800, 200, 0.3); // Higher volume: 0.3 instead of 0.1
+                    setTimeout(() => playBeep(1000, 200, 0.3), 250);
+                    setTimeout(() => playBeep(1200, 300, 0.3), 500);
+                    showSoundFeedback('🎵'); // Visual feedback
+                } else if (type === 'longbreak') {
+                    // Special celebration sound for long break
+                    playBeep(523, 200, 0.35); // Higher volume: 0.35
+                    setTimeout(() => playBeep(659, 200, 0.35), 200); // E5
+                    setTimeout(() => playBeep(784, 200, 0.35), 400); // G5
+                    setTimeout(() => playBeep(1047, 400, 0.35), 600); // C6
+                    showSoundFeedback('🎉'); // Visual feedback
+                } else {
+                    // Gentle sound for break completion and task completion
+                    playBeep(600, 300, 0.25); // Higher volume: 0.25 instead of 0.1
+                    setTimeout(() => playBeep(500, 300, 0.25), 350);
+                    showSoundFeedback('🔔'); // Visual feedback
+                }
+            } catch (error) {
+                console.log('Audio not supported in this browser:', error);
+                // Fallback: show visual notification
+                showSoundFeedback('🔊');
+            }
+        }
+
+        function showSoundFeedback(icon) {
+            // Create temporary sound indicator
+            const indicator = document.createElement('div');
+            indicator.innerHTML = icon;
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                font-size: 24px;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 10px;
+                border-radius: 50%;
+                z-index: 10000;
+                animation: soundPulse 1s ease-out forwards;
+            `;
+            document.body.appendChild(indicator);
+            setTimeout(() => indicator.remove(), 1000);
+        }
+
+        function playBeep(frequency, duration, volume = 0.3) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Resume context if suspended (required for Chrome)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                // Improved volume curve for better sound
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.05); // Faster attack
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration / 1000);
+                
+            } catch (error) {
+                console.log('Beep failed:', error);
+            }
+        }
+
+        // Initialize audio context on first user interaction
+        let audioInitialized = false;
+        function initializeAudio() {
+            if (!audioInitialized) {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    audioInitialized = true;
+                    console.log('Audio initialized');
+                } catch (error) {
+                    console.log('Audio initialization failed');
+                }
+            }
+        }
+
+        // Initialize progress circle
+        const circle = document.getElementById('progressCircle');
+        const circumference = 2 * Math.PI * 90;
+        circle.style.strokeDasharray = circumference;
+        circle.style.strokeDashoffset = circumference; // Start with full offset (empty circle)
+
+        // Task Functions
+        function addTask() {
+            const titleInput = document.getElementById('taskTitle');
+            const priorityInput = document.getElementById('taskPriority');
+            const dateInput = document.getElementById('taskDate');
+            const timeInput = document.getElementById('taskTime');
+            const ampmInput = document.getElementById('taskAmPm');
+            
+            const title = titleInput.value.trim();
+            if (!title) return;
+
+            // Format datetime
+            let taskDateTime = '';
+            if (dateInput.value || timeInput.value) {
+                const date = dateInput.value || new Date().toISOString().split('T')[0];
+                const time = timeInput.value || '12:00';
+                const ampm = ampmInput.value;
+                taskDateTime = `${date} at ${time} ${ampm}`;
+            }
+
+            const task = {
+                id: nextId++,
+                title: title,
+                priority: priorityInput.value,
+                datetime: taskDateTime,
+                completed: false,
+                createdAt: new Date()
+            };
+
+            tasks.unshift(task);
+            
+            // Clear inputs
+            titleInput.value = '';
+            dateInput.value = '';
+            timeInput.value = '';
+            priorityInput.value = 'medium';
+            ampmInput.value = 'PM';
+            
+            renderTasks();
+            updateStats();
+        }
+
+        function completeTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                const wasCompleted = task.completed;
+                task.completed = !task.completed;
+                
+                // Show celebration if task was just completed
+                if (!wasCompleted && task.completed) {
+                    // Play task completion sound
+                    initializeAudio();
+                    playNotificationSound('break'); // Use gentle break sound for task completion
+                    showCelebration();
+                }
+                
+                renderTasks();
+                updateStats();
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderTasks();
+            updateStats();
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No tasks yet</h3>
+                        <p>Add your first task above to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            taskList.innerHTML = tasks.map(task => `
+                <div class="task-item ${task.completed ? 'completed' : ''}">
+                    <div class="task-header">
+                        <div class="task-title ${task.completed ? 'completed' : ''}">${task.title}</div>
+                        <span class="task-priority priority-${task.priority}">${task.priority.toUpperCase()}</span>
+                    </div>
+                    ${task.datetime ? `
+                        <div class="task-datetime">
+                            <i class="fas fa-clock"></i> ${task.datetime}
+                        </div>
+                    ` : ''}
+                    <div class="task-actions">
+                        <button class="btn btn-success btn-small" onclick="completeTask(${task.id})">
+                            <i class="fas fa-${task.completed ? 'undo' : 'check'}"></i>
+                            ${task.completed ? 'Undo' : 'Done'}
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="deleteTask(${task.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const completed = tasks.filter(t => t.completed).length;
+            document.getElementById('completedTasks').textContent = completed;
+        }
+
+        // Pomodoro Timer Functions
+        function startTimer() {
+            // Initialize audio on first user interaction
+            initializeAudio();
+            
+            if (!isRunning) {
+                isRunning = true;
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'inline-flex';
+                
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    updateProgressCircle();
+                    
+                    if (timeLeft <= 0) {
+                        timerFinished();
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timerInterval);
+                document.getElementById('startBtn').style.display = 'inline-flex';
+                document.getElementById('pauseBtn').style.display = 'none';
+            }
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            
+            if (isWorkTime) {
+                timeLeft = 25 * 60; // 25 minutes work
+            } else {
+                // Check if it's time for a long break
+                if (pomodoroCount % 4 === 0 && pomodoroCount > 0) {
+                    timeLeft = 15 * 60; // 15 minutes long break
+                } else {
+                    timeLeft = 5 * 60; // 5 minutes short break
+                }
+            }
+            
+            updateTimerDisplay();
+            updateProgressCircle();
+            document.getElementById('startBtn').style.display = 'inline-flex';
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function timerFinished() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            
+            if (isWorkTime) {
+                pomodoroCount++;
+                document.getElementById('pomodoroSessions').textContent = pomodoroCount;
+                
+                // Play work completion sound
+                playNotificationSound('work');
+                
+                // Show special Pomodoro completion celebration
+                showPomodorocelebration();
+                
+                isWorkTime = false;
+                
+                // Long break after every 4 pomodoros
+                if (pomodoroCount % 4 === 0) {
+                    timeLeft = 15 * 60; // 15 minutes long break
+                    
+                    // Play special long break sound
+                    setTimeout(() => playNotificationSound('longbreak'), 1000);
+                    
+                    // Motivational messages for long break
+                    const motivationalMessages = [
+                        '🎉 Amazing! You completed 4 Pomodoros! Take a well-deserved 15-minute break to recharge your mind!',
+                        '🌟 Outstanding focus! 4 sessions done! Enjoy your 15-minute break - you\'ve earned it!',
+                        '🚀 Incredible productivity! Time for a 15-minute power break. Stretch, breathe, and celebrate your progress!',
+                        '💪 You\'re on fire! 4 Pomodoros completed! Take 15 minutes to relax and come back even stronger!',
+                        '🎯 Fantastic work! Your focus is paying off! Enjoy this 15-minute break and appreciate your achievements!',
+                        '⭐ You\'re a productivity champion! 4 sessions conquered! Take 15 minutes to refresh and reset!',
+                        '🏆 Excellence achieved! Your dedication is inspiring! Enjoy your well-earned 15-minute break!'
+                    ];
+                    
+                    const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+                    document.getElementById('treeStatus').innerHTML = randomMessage;
+                    
+                    // Show a special long break alert
+                    setTimeout(() => {
+                        alert('🎊 CONGRATULATIONS! 🎊\n\nYou just completed 4 focus sessions!\nTake this 15-minute break to:\n\n✨ Stretch and move your body\n🧘 Practice mindfulness\n💧 Stay hydrated\n🌿 Step outside for fresh air\n\nYou\'re doing amazing! Keep up the great work! 💪');
+                    }, 1000);
+                } else {
+                    timeLeft = 5 * 60; // 5 minutes short break
+                }
+            } else {
+                // Break finished - play gentle sound
+                playNotificationSound('break');
+                alert('☕ Break time is over! Ready for another focus session?');
+                isWorkTime = true;
+                timeLeft = 25 * 60; // 25 minutes work session
+            }
+            
+            updateTimerMode();
+            updateTimerDisplay();
+            updateProgressCircle();
+            document.getElementById('startBtn').style.display = 'inline-flex';
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerMode() {
+            const modeElement = document.getElementById('timerMode');
+            if (isWorkTime) {
+                modeElement.innerHTML = '<span class="mode-work">Focus Time</span>';
+            } else {
+                modeElement.innerHTML = '<span class="mode-break">Break Time</span>';
+            }
+        }
+
+        function updateProgressCircle() {
+            // Calculate total time based on current mode and break type
+            let totalTime;
+            if (isWorkTime) {
+                totalTime = 25 * 60; // 25 minutes for work
+            } else {
+                // Check if it's a long break (after 4 pomodoros)
+                if (pomodoroCount % 4 === 0 && pomodoroCount > 0) {
+                    totalTime = 15 * 60; // 15 minutes for long break
+                } else {
+                    totalTime = 5 * 60; // 5 minutes for short break
+                }
+            }
+            
+            const progress = (totalTime - timeLeft) / totalTime;
+            const offset = circumference - (progress * circumference);
+            circle.style.strokeDashoffset = offset;
+            
+            // Update growing tree
+            updateGrowingTree(progress);
+        }
+
+        function updateGrowingTree(progress) {
+            // Get all tree growth stages
+            const seed = document.getElementById('seed');
+            const sprout = document.getElementById('sprout');
+            const youngPlant = document.getElementById('youngPlant');
+            const smallTree = document.getElementById('smallTree');
+            const mediumTree = document.getElementById('mediumTree');
+            const matureTree = document.getElementById('matureTree');
+            const treeFruits = document.getElementById('treeFruits');
+            const treeStatus = document.getElementById('treeStatus');
+            
+            // Debug: log progress to see if function is called
+            console.log('Tree growth progress:', Math.round(progress * 100) + '%', 'Work time:', isWorkTime);
+            
+            if (isWorkTime) {
+                // Hide all stages first
+                [seed, sprout, youngPlant, smallTree, mediumTree, matureTree, treeFruits].forEach(stage => {
+                    if (stage) stage.setAttribute('opacity', '0');
+                });
+                
+                // Growth stages based on progress percentage
+                if (progress <= 0.15) {
+                    // Stage 1: Seed (0-15%) - Always show seed at the beginning
+                    if (seed) {
+                        seed.setAttribute('opacity', '1');
+                        const seedSize = 2 + (progress / 0.15) * 1; // Seed grows slightly
+                        seed.setAttribute('r', seedSize);
+                        treeStatus.innerHTML = '🌰 Your focus seed is planted and ready to grow...';
+                    }
+                    
+                } else if (progress <= 0.30) {
+                    // Stage 2: Sprout emerges (15-30%)
+                    seed.setAttribute('opacity', '0.3'); // Seed still visible but fading
+                    const sproutProgress = (progress - 0.15) / 0.15;
+                    sprout.setAttribute('opacity', sproutProgress);
+                    
+                    // Animate sprout growing upward
+                    const sproutHeight = 165 - (sproutProgress * 2);
+                    sprout.querySelector('line').setAttribute('y2', sproutHeight);
+                    treeStatus.innerHTML = '🌱 A tiny sprout emerges! Your focus is taking root...';
+                    
+                } else if (progress <= 0.50) {
+                    // Stage 3: Young plant (30-50%)
+                    const plantProgress = (progress - 0.30) / 0.20;
+                    youngPlant.setAttribute('opacity', plantProgress);
+                    
+                    // Animate stem growing taller and leaves getting bigger
+                    const stemHeight = 155 + (1 - plantProgress) * 8;
+                    youngPlant.querySelector('line').setAttribute('y2', stemHeight);
+                    
+                    // Scale leaves with progress
+                    const leafScale = 0.8 + (plantProgress * 0.4);
+                    youngPlant.querySelectorAll('ellipse').forEach(leaf => {
+                        leaf.style.transform = `scale(${leafScale})`;
+                        leaf.style.transformOrigin = 'center';
+                    });
+                    treeStatus.innerHTML = '🌿 Growing into a young plant! Keep that focus steady...';
+                    
+                } else if (progress <= 0.70) {
+                    // Stage 4: Small tree (50-70%)
+                    const smallTreeProgress = (progress - 0.50) / 0.20;
+                    smallTree.setAttribute('opacity', smallTreeProgress);
+                    
+                    // Tree crown grows dynamically
+                    const outerCrownSize = 18 + smallTreeProgress * 5;
+                    const innerCrownSize = 14 + smallTreeProgress * 4;
+                    smallTree.querySelectorAll('circle')[0].setAttribute('r', outerCrownSize);
+                    smallTree.querySelectorAll('circle')[1].setAttribute('r', innerCrownSize);
+                    treeStatus.innerHTML = '🌳 Your focus tree is taking shape! Branches are forming...';
+                    
+                } else if (progress <= 0.90) {
+                    // Stage 5: Medium tree (70-90%)
+                    const mediumTreeProgress = (progress - 0.70) / 0.20;
+                    mediumTree.setAttribute('opacity', mediumTreeProgress);
+                    
+                    // Animate branches and fuller crown growing
+                    const mainCrownSize = 25 + mediumTreeProgress * 5;
+                    const secondaryCrownSize = 20 + mediumTreeProgress * 4;
+                    mediumTree.querySelectorAll('circle')[0].setAttribute('r', mainCrownSize);
+                    mediumTree.querySelectorAll('circle')[1].setAttribute('r', secondaryCrownSize);
+                    
+                    // Side foliage grows too
+                    const sideFoliageSize = 12 + mediumTreeProgress * 3;
+                    const smallSideSize = 8 + mediumTreeProgress * 2;
+                    mediumTree.querySelectorAll('circle')[2].setAttribute('r', sideFoliageSize);
+                    mediumTree.querySelectorAll('circle')[3].setAttribute('r', sideFoliageSize);
+                    mediumTree.querySelectorAll('circle')[4].setAttribute('r', smallSideSize);
+                    mediumTree.querySelectorAll('circle')[5].setAttribute('r', smallSideSize);
+                    treeStatus.innerHTML = '🌲 Strong and growing! Your concentration is building power...';
+                    
+                } else {
+                    // Stage 6: Mature tree with fruits (90-100%)
+                    const matureProgress = (progress - 0.90) / 0.10;
+                    matureTree.setAttribute('opacity', Math.min(1, matureProgress * 1.2));
+                    
+                    // Crown layers grow to full size
+                    const crown1Size = 35 + matureProgress * 5;
+                    const crown2Size = 30 + matureProgress * 4;
+                    const crown3Size = 25 + matureProgress * 3;
+                    const crown4Size = 20 + matureProgress * 2;
+                    
+                    const crowns = matureTree.querySelectorAll('circle');
+                    if (crowns.length >= 4) {
+                        crowns[0].setAttribute('r', crown1Size);
+                        crowns[1].setAttribute('r', crown2Size);
+                        crowns[2].setAttribute('r', crown3Size);
+                        crowns[3].setAttribute('r', crown4Size);
+                    }
+                    
+                    // Final stage: fruits and flowers appear
+                    if (progress > 0.95) {
+                        const fruitProgress = (progress - 0.95) / 0.05;
+                        treeFruits.setAttribute('opacity', fruitProgress);
+                        treeStatus.innerHTML = '🍎 Magnificent! Your tree bears the fruits of deep focus!';
+                        
+                        // Add a subtle celebration effect - fruits gently pulse
+                        const pulse = 1 + Math.sin(Date.now() / 200) * 0.1;
+                        treeFruits.querySelectorAll('circle').forEach(fruit => {
+                            const baseR = fruit.getAttribute('r') || 2.5;
+                            fruit.setAttribute('r', baseR * pulse);
+                        });
+                    } else {
+                        treeStatus.innerHTML = '🌳 Almost there! Your focus tree is reaching maturity...';
+                    }
+                }
+                
+                // Add wind effect to mature stages
+                if (progress > 0.5) {
+                    const wind = Math.sin(Date.now() / 1000) * 1;
+                    const currentStage = progress > 0.9 ? matureTree : (progress > 0.7 ? mediumTree : smallTree);
+                    if (currentStage && currentStage.getAttribute('opacity') > 0) {
+                        currentStage.style.transform = `rotate(${wind}deg)`;
+                        currentStage.style.transformOrigin = '100px 180px'; // Updated for larger tree
+                    }
+                }
+                
+            } else {
+                // During break time: gentle swaying of whatever stage was reached
+                const breathe = 0.7 + Math.sin(Date.now() / 1000) * 0.3;
+                treeStatus.innerHTML = '☕ Break time - your tree rests and sways in the breeze...';
+                
+                // Keep the last reached stage visible but breathing
+                if (matureTree.getAttribute('opacity') > 0) {
+                    matureTree.setAttribute('opacity', breathe);
+                    treeFruits.setAttribute('opacity', breathe * 0.8);
+                } else if (mediumTree.getAttribute('opacity') > 0) {
+                    mediumTree.setAttribute('opacity', breathe);
+                } else if (smallTree.getAttribute('opacity') > 0) {
+                    smallTree.setAttribute('opacity', breathe);
+                } else if (youngPlant.getAttribute('opacity') > 0) {
+                    youngPlant.setAttribute('opacity', breathe);
+                } else if (sprout.getAttribute('opacity') > 0) {
+                    sprout.setAttribute('opacity', breathe);
+                } else {
+                    // If no other stage is visible, show the seed during break
+                    if (seed) {
+                        seed.setAttribute('opacity', breathe);
+                        seed.setAttribute('r', '3'); // Default seed size
+                    }
+                }
+            }
+        }
+
+        function showCelebration() {
+            const celebrationMessages = [
+                "🎉 Awesome! Task completed!",
+                "🌟 Great job! Keep it up!",
+                "🎊 Fantastic work!",
+                "🏆 Another one done!",
+                "💫 You're on fire!",
+                "🎯 Nailed it!"
+            ];
+            
+            const randomMessage = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
+            
+            const celebrationHTML = `
+                <div class="celebration-overlay" id="celebrationOverlay">
+                    <div class="celebration-content">
+                        <div class="balloon balloon-1"></div>
+                        <div class="balloon balloon-2"></div>
+                        <div class="balloon balloon-3"></div>
+                        
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        
+                        <div class="celebration-title">🎉 WELL DONE! 🎉</div>
+                        <div class="celebration-message">${randomMessage}</div>
+                        <button class="celebration-close" onclick="hideCelebration()">
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', celebrationHTML);
+            
+            // Auto-hide after 4 seconds
+            setTimeout(() => {
+                hideCelebration();
+            }, 4000);
+        }
+
+        function hideCelebration() {
+            const overlay = document.getElementById('celebrationOverlay');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 300);
+            }
+        }
+
+        function showPomodorocelebration() {
+            const completedTasks = tasks.filter(t => t.completed).length;
+            const totalTasks = tasks.length;
+            
+            const pomodoroMessages = [
+                "🍅 Amazing focus session completed!",
+                "🎯 You absolutely crushed those 25 minutes!",
+                "🌟 Fantastic concentration! Your productivity is soaring!",
+                "🚀 Another successful Pomodoro in the books!",
+                "💪 You're building incredible focus habits!",
+                "🏆 Focus master! Time for a well-deserved break!"
+            ];
+            
+            const randomMessage = pomodoroMessages[Math.floor(Math.random() * pomodoroMessages.length)];
+            
+            const pomodoroHTML = `
+                <div class="pomodoro-celebration" id="pomodorocelebration">
+                    <div class="pomodoro-content">
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        
+                        <div class="pomodoro-title">🍅 POMODORO COMPLETE! 🍅</div>
+                        <div class="tomato-animation">🍅✨🍅✨🍅</div>
+                        <div class="pomodoro-message">${randomMessage}</div>
+                        
+                        <div class="achievement-stats">
+                            <div class="stat-bubble">
+                                🎯 Session #${pomodoroCount}
+                            </div>
+                            <div class="stat-bubble">
+                                ✅ ${completedTasks}/${totalTasks} Tasks
+                            </div>
+                            <div class="stat-bubble">
+                                🔥 25min Focus
+                            </div>
+                        </div>
+                        
+                        <button class="pomodoro-close" onclick="hidePomodorocelebration()">
+                            Take Your Break <i class="fas fa-coffee"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', pomodoroHTML);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                hidePomodorocelebration();
+            }, 5000);
+        }
+
+        function hidePomodorocelebration() {
+            const overlay = document.getElementById('pomodorocelebration');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.5s ease-out';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 500);
+            }
+        }
+
+        // Handle Enter key for adding tasks
+        document.getElementById('taskTitle').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // Initialize
+        document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+        updateTimerDisplay();
+        updateProgressCircle();
+        renderTasks();
+        updateStats();
+        
+        // Initialize tree with starting state - make sure seed is visible
+        updateGrowingTree(0);
+        document.getElementById('treeStatus').innerHTML = '🌱 Ready to plant your focus seed';
+        
+        // Ensure seed is visible at startup
+        const startingSeed = document.getElementById('seed');
+        if (startingSeed) {
+            startingSeed.setAttribute('opacity', '1');
+            startingSeed.setAttribute('r', '3');
+        }
+        
+        // Debug mode - uncomment to test tree growth
+        // setTimeout(() => {
+        //     console.log('Testing tree growth...');
+        //     for (let i = 0; i <= 100; i++) {
+        //         setTimeout(() => updateGrowingTree(i / 100), i * 50);
+        //     }
+        // }, 2000);
+    </script>
+</body>
+</html>
